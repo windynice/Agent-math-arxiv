@@ -1,0 +1,29 @@
+name: arXiv Math Paper Analysis
+
+on:
+  schedule:
+    - cron: '0 0 * * 1'  # 每周一运行
+  workflow_dispatch:      # 允许手动触发
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.9'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests feedparser matplotlib seaborn wordcloud
+    - name: Run analysis
+      run: python arxiv_analysis.py
+    - name: Commit results
+      run: |
+        git config --global user.name "GitHub Actions"
+        git config --global user.email "actions@github.com"
+        git add *.png
+        git commit -m "Update arXiv analysis results" || echo "No changes to commit"
+        git push
